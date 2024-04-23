@@ -93,6 +93,8 @@ allocator_status_t ALLOCATOR_free(void** ptr)
 
         allocator_remove_chunk(&g_allocated_chunks, found_index);
         allocator_insert_chunk(&g_freed_chunks, chunk.start, chunk.size);
+
+        allocator_merge_chunks(&g_freed_chunks);
     }
 
     *ptr = NULL;
@@ -104,13 +106,13 @@ l_cleanup:
 
 void ALLOCATOR_dump_allocated_chunks()
 {
-    puts("Allocated chunks:");
+    (void)puts("Allocated chunks:");
     allocator_dump_chunks(g_allocated_chunks);
 }
 
 void ALLOCATOR_dump_freed_chunks()
 {
-    puts("Freed chunks:");
+    (void)puts("Freed chunks:");
     allocator_dump_chunks(g_freed_chunks);
 }
 
@@ -122,10 +124,10 @@ void allocator_dump_chunks(ChunkList chunk_list)
     for (index = 0; index < chunk_list.count; ++index)
     {
         chunk = chunk_list.chunks[index];
-        printf("\t(%02zu) size: %5zu, start: %p\n", index, chunk.size, chunk.start);
+        (void)printf("\t(%02zu) size: %5zu, start: %p\n", index, chunk.size, chunk.start);
     }
 
-    puts("");
+    (void)puts("");
 }
 
 int32_t allocator_find_chunk(ChunkList chunk_list, void* ptr)
@@ -188,4 +190,29 @@ void allocator_remove_chunk(ChunkList* chunk_list, int32_t chunk_index)
     }
 
     --chunk_list->count;
+}
+
+void allocator_merge_chunks(ChunkList* chunk_list)
+{
+    /* chunk_list->count may be 0 and then underflow if its unsigned */
+    int32_t index = 0;
+    Chunk* current_chunk = NULL;
+    Chunk next_chunk = { 0 };
+
+    for (index = 0; index < (long long)chunk_list->count - 1; ++index)
+    {
+        current_chunk = &chunk_list->chunks[index];
+        next_chunk = chunk_list->chunks[index + 1];
+
+        /* If the end of the current chunk is the start of the next chunk,
+         * merge them. */
+        if (current_chunk->start + current_chunk->size == next_chunk.start)
+        {
+            /* Setting the new size */
+            current_chunk->size += next_chunk.size;
+
+            /* Removes the next chunk */
+            allocator_remove_chunk(chunk_list, index + 1);
+        }
+    }
 }

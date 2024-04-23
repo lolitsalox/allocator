@@ -18,16 +18,17 @@
 int main(void)
 {
     allocator_status_t status = ALLOCATOR_STATUS_UNINITIALIZED;
-
     void* ptr = NULL;
+    size_t index = 0;
 
-    for (int i = 0; i < 11; ++i) {
-        status = ALLOCATOR_malloc(i, &ptr);
+    for (index = 0; index < 11; ++index) 
+    {
+        status = ALLOCATOR_malloc(index, &ptr);
         if (ALLOCATOR_STATUS_SUCCESS != status) {
             goto l_cleanup;
         }
 
-        if (!(i % 3) || !(i % 4))
+        if (!(index % 3) || !(index % 4))
         {
             status = ALLOCATOR_free(&ptr);
             if (ALLOCATOR_STATUS_SUCCESS != status) {

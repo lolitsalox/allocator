@@ -63,15 +63,16 @@ void allocator_dump_chunks(ChunkList chunk_list);
  * 
  * @param chunk_list the chunk list to be searched
  * @param ptr the pointer to search for
- * @return int32_t an index to the found chunk in chunk_list
- * @retval -1: means that the chunk was not found
+ * 
+ * @return `int32_t` - an index to the found chunk in chunk_list
+ * @retval `-1` - the chunk was not found
  */
 int32_t allocator_find_chunk(ChunkList chunk_list, void* ptr);
 
 /**
  * @brief Inserts (in a sorting manner) a new chunk into `chunk_list`
  * 
- * @param chunk_list the list to be inserted into
+ * @param[in,out] chunk_list the list to be inserted into
  * @param start the start pointer of the new chunk (sorted by this value)
  * @param size the size of the new chunk
  */
@@ -80,10 +81,17 @@ void allocator_insert_chunk(ChunkList* chunk_list, void* start, size_t size);
 /**
  * @brief Removes a chunk with the index `index` from `chunk_list`
  * 
- * @param chunk_list the list to remove the chunk from
+ * @param[in,out] chunk_list the list to remove the chunk from
  * @param index the index of the chunk to be removed
  */
 void allocator_remove_chunk(ChunkList* chunk_list, int32_t index);
+
+/**
+ * @brief Merges chunks that are continuous
+ * 
+ * @param[in,out] chunk_list The chunk list to be merged 
+ */
+void allocator_merge_chunks(ChunkList* chunk_list);
 
 
 #endif /* __ALLOCATOR_INTERNAL_H__ */
